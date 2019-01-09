@@ -10,10 +10,14 @@ const cursoController = require('../controllers/cursos');
 router.get('/', sitioController.check_cred, sitioController.get_cupo);
 router.post('/registrar', sitioController.check_cred, sitioController.check_duplicate, sitioController.post_curso);
 */
+
+//Cursos
 router.get('/cursos', cursoController.get_all_cursos);
 router.post('/cursos', cursoController.post_nuevo);
 router.delete('/cursos/:idCurso', cursoController.delete_curso);
-router.post('/cursos/reservar', cursoController.post_agregar_reserva);
+//Reservas
+router.get('/cursos/estudiante/:carnet', cursoController.get_reservas);
+router.post('/cursos/reservar', cursoController.post_agregar_reservas);
 
 
 module.exports = router;

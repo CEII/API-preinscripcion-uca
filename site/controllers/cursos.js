@@ -9,12 +9,40 @@ exports.post_nuevo = (req,res,next)=>{
         salon: req.body.salon,
         cupo: req.body.cupo,
         min: req.body.min,
+        numeroInscritos: doc.inscritos.length,
         descripcion: req.body.descripcion
     });
     nuevoCurso.save().then(resultado =>{
         res.status(201).json(resultado);
     })
     .catch(err => {
+        res.status(500).json(err);
+    });
+};
+
+exports.get_reservas = (req, res, next) =>{
+    bodyCarnet = req.body.carnet;
+    Curso.find({inscritos: bodyCarnet}).sort({name: 1})
+    .exec()
+    .then(docs =>{
+        res.status(200).json({
+            cuenta: docs.length,
+            cursos: docs.map(doc=>{
+                return {
+                   _id: doc._id,
+                   nombre: doc.nombre,
+                   ponente: doc.ponente,
+                   hora: doc.hora,
+                   fechaEvento: doc.fechaEvento,
+                   salon: doc.salon,
+                   cupo: doc.cupo,
+                   min: doc.min,
+                   numeroInscritos: doc.inscritos.length,
+                   inscritos: doc.inscritos
+                }
+            })
+        });
+    }).catch(err =>{
         res.status(500).json(err);
     });
 };
@@ -35,7 +63,7 @@ exports.get_all_cursos = (req, res, next)=>{
                    salon: doc.salon,
                    cupo: doc.cupo,
                    min: doc.min,
-                   numeroInscritos: doc.length,
+                   numeroInscritos: doc.inscritos.length,
                    inscritos: doc.inscritos
                 }
             })
@@ -55,7 +83,7 @@ exports.delete_curso = (req, res, next)=>{
     }); 
 };
 
-exports.post_agregar_reserva = (req, res, next)=>{
+exports.post_agregar_reservas = (req, res, next)=>{
     idReservas = req.body.reservas;
     bodyCarnet = req.body.carnet;
     Curso.find({inscritos: bodyCarnet}).exec()
@@ -90,14 +118,6 @@ exports.post_agregar_reserva = (req, res, next)=>{
                 borrar.push(docs[i]._id);
             }
         }
-        console.log(idReservas);
-        console.log('**********');
-        console.log(docs);
-        console.log('**********');
-        console.log(agregar);
-        console.log('**********');
-        console.log(borrar);
-        
         Curso.update(
             {_id: {$in: agregar}},
             {$addToSet: {inscritos:bodyCarnet}})
