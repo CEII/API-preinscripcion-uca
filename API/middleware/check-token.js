@@ -8,6 +8,6 @@ module.exports = (req,res,next) =>{
         req.userData = decoded;
         next();
     }catch(error){
-        autenticacion.falloAutenticacion(res,error);
+        res.status(500).json({message: "No logeado"});
     }
 };

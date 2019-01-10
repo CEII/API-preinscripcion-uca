@@ -9,7 +9,7 @@ router.post('/', cursoController.post_nuevo);
 router.delete('/:idCurso', cursoController.delete_curso);
 
 //Reservas
-router.get('/', checkLogin, cursoController.get_reservas);
+router.get('/reservar', checkLogin, cursoController.get_reservas);
 router.post('/reservar', checkLogin, cursoController.post_agregar_reservas);
 
 
