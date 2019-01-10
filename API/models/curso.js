@@ -13,4 +13,9 @@ var cursoSchema = mongoose.Schema({
     asistieron: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Estudiante'}]
 });
 
+function arrayLimit(val, limite) {
+    return inscritos.length <= limite;
+}
+
 module.exports = mongoose.model('Curso', cursoSchema);
+

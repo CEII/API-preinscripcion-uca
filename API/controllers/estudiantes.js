@@ -60,6 +60,7 @@ exports.get_all_estudiantes = (req, res, next)=>{
     });
 };
 
+
 exports.delete_estudiante = (req, res, next)=>{
     const id = req.params.idEstudiante;
     Estudiante.remove({_id: id}).exec().then(result => {
