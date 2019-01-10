@@ -9,7 +9,6 @@ exports.post_nuevo = (req,res,next)=>{
         salon: req.body.salon,
         cupo: req.body.cupo,
         min: req.body.min,
-        numeroInscritos: doc.inscritos.length,
         descripcion: req.body.descripcion
     });
     nuevoCurso.save().then(resultado =>{
@@ -21,8 +20,8 @@ exports.post_nuevo = (req,res,next)=>{
 };
 
 exports.get_reservas = (req, res, next) =>{
-    bodyCarnet = req.body.carnet;
-    Curso.find({inscritos: bodyCarnet}).sort({name: 1})
+    idUsuario = req.userData.idUsuario;
+    Curso.find({inscritos: idUsuario}).sort({name: 1})
     .exec()
     .then(docs =>{
         res.status(200).json({
@@ -85,25 +84,13 @@ exports.delete_curso = (req, res, next)=>{
 
 exports.post_agregar_reservas = (req, res, next)=>{
     idReservas = req.body.reservas;
-    bodyCarnet = req.body.carnet;
-    Curso.find({inscritos: bodyCarnet}).exec()
+    idUsuario = req.userData.idUsuario;
+    const borrar = [];
+    const agregar = [];
+    Curso.find({inscritos: idUsuario})
+    .select('_id')
+    .exec()
     .then(docs =>{
-        const borrar = [];
-        const agregar = [];
-        for(var i in idReservas){
-            var flag=true;
-            var j = 0;
-            for(j in docs){
-                if(idReservas[i]==docs[j]._id){
-                    console.log(docs[j]._id);
-                    flag=false;
-                    break;
-                }
-            }
-            if(flag){
-                agregar.push(idReservas[i]);
-            }
-        }
         for(var i in docs){
             var flag=true;
             var j = 0;
@@ -118,23 +105,25 @@ exports.post_agregar_reservas = (req, res, next)=>{
                 borrar.push(docs[i]._id);
             }
         }
-        Curso.update(
-            {_id: {$in: agregar}},
-            {$addToSet: {inscritos:bodyCarnet}})
-        .exec()
-        .then()
-        .catch(err =>{
-            return res.status(500).json(err);
-        });
-        Curso.update(
-        {_id: {$in: borrar}},
-        { $pull: { inscritos: bodyCarnet}},{ multi: true }).exec()
-        .then(updated =>{
-            res.status(200).json({message: "Curso chidori"});
-        })
-        .catch(err =>{
-            return res.status(500).json(err);
-        });
+        Curso.updateMany({_id: {$in: borrar}},{ $pull: { inscritos: idUsuario}},{ multi: true }).exec();
+        return docs;
+    }).then(chain =>{
+        for(var i in idReservas){
+            var flag=true;
+            var j = 0;
+            for(j in chain){
+                if(idReservas[i]==chain[j]._id){
+                    console.log(chain[j]._id);
+                    flag=false;
+                    break;
+                }
+            }
+            if(flag){
+                agregar.push(idReservas[i]);
+            }
+        }
+        Curso.updateMany({_id: {$in: agregar}},{$addToSet: {inscritos:idUsuario}}).exec();
+        res.status(200).json({message: "Inscrito!"});
     }).catch(err =>{
         res.status(500).json(err);
     });

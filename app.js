@@ -3,7 +3,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const mongoose = require('mongoose');
 
-
 const express = require('express');
 const app = express();
 
@@ -23,7 +22,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //Rutas
-const registrarRoutes = require('./site/routes/registrar');
+const registrarRoutes = require('./API/routes/registrar');
+const estudianteRoutes = require('./API/routes/estudiante');
+const cursoRoutes = require('./API/routes/curso');
 
 //Para evitar problemas de CORS
 app.use((req,res,next)=>{
@@ -45,8 +46,11 @@ app.use((req,res,next)=>{
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
 //Rutas de la pagina
-app.use('/sistema', registrarRoutes);
+//app.use('/sistema/registrar', registrarRoutes);
+app.use('/sistema/estudiantes', estudianteRoutes);
+app.use('/sistema/cursos', cursoRoutes);
 
 module.exports = app;
 

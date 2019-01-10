@@ -9,8 +9,8 @@ var cursoSchema = mongoose.Schema({
     min: {type: Number,  require:true},
     cupo: { type: Number,  require:true},
     descripcion: {type: String, require: true},
-    inscritos: [{ type: String}],
-    asistieron: [{ type: String}]
+    inscritos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Estudiante'}],
+    asistieron: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Estudiante'}]
 });
 
 module.exports = mongoose.model('Curso', cursoSchema);
