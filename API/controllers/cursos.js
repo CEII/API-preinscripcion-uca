@@ -3,24 +3,16 @@ const Curso = require('../models/curso');
 exports.get_reservas = (req, res, next) =>{
     idUsuario = req.userData.idUsuario;
     Curso.find({inscritos: idUsuario}).sort({name: 1})
+    .select('_id')
     .exec()
     .then(docs =>{
+        const finalArray = [];
+        for(var i in docs){
+            finalArray.push(docs[i]._id);
+        }
         res.status(200).json({
-            cuenta: docs.length,
-            cursos: docs.map(doc=>{
-                return {
-                   _id: doc._id,
-                   nombre: doc.nombre,
-                   ponente: doc.ponente,
-                   hora: doc.hora,
-                   fechaEvento: doc.fechaEvento,
-                   salon: doc.salon,
-                   cupo: doc.cupo,
-                   min: doc.min,
-                   numeroInscritos: doc.inscritos.length,
-                   inscritos: doc.inscritos
-                }
-            })
+            numeroInscritos: docs.length,
+            cursosInscritos: finalArray
         });
     }).catch(err =>{
         res.status(500).json(err);
@@ -32,7 +24,7 @@ exports.get_all_cursos = (req, res, next)=>{
     .exec()
     .then(docs =>{
         res.status(200).json({
-            cuenta: docs.length,
+            numeroCursos: docs.length,
             cursos: docs.map(doc=>{
                 return {
                    _id: doc._id,
