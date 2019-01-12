@@ -122,7 +122,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
     .then(cursoDoc =>{
         Estudiante.findById(idUsuario)
         .select('cursosInscritos horario')
-        .populate('Cursos', 'hora cursosInscritos')
+        .populate('cursosInscritos', 'hora cursosInscritos numeroDia')
         .exec().then(estudianteDoc=>{
             var estaInscrito = false;
             var horarioOcupado = false;
@@ -131,10 +131,13 @@ exports.post_verificar_reserva = (req, res, next) =>{
                     estaInscrito = true;
                 }
                 else{
+                    
+                    console.log(cursoDoc.hora+" "+arregloInscritos.hora);
+                    console.log(cursoDoc.numeroDia+" "+arregloInscritos.numeroDia);
                     if(cursoDoc.horario==arregloInscritos.horario){
                         horarioOcupado = true;
                     }
-                    else if(cursoDoc.hora==arregloInscritos.hora){
+                    else if(cursoDoc.hora==arregloInscritos.hora && cursoDoc.numeroDia == arregloInscritos.numeroDia){
                         horarioOcupado = true;
                     }
                 }

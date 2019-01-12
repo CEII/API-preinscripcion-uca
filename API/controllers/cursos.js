@@ -1,7 +1,7 @@
 const Curso = require('../models/curso');
 
 exports.get_all_cursos = (req, res, next)=>{
-    Curso.find({}).sort({nombre: 1})
+    Curso.find({}).sort({horario: -1, numeroDia: 1})
     .exec()
     .then(docs =>{
         res.status(200).json({
