@@ -9,7 +9,6 @@ const app = express();
 
 app.use(morgan('dev'));
 
-
 //Conexion a la base datos
 mongoose.connect(
     'mongodb://shop-user:5MEGjBgDulqbVW8Z@storedatabase-shard-00-00-o0sy6.mongodb.net:27017,storedatabase-shard-00-01-o0sy6.mongodb.net:27017,storedatabase-shard-00-02-o0sy6.mongodb.net:27017/test?ssl=true&replicaSet=StoreDatabase-shard-0&authSource=admin&retryWrites=true', {
@@ -51,6 +50,22 @@ app.set('view engine', 'ejs');
 //app.use('/sistema/registrar', registrarRoutes);
 app.use('/sistema/estudiantes', estudianteRoutes);
 app.use('/sistema/cursos', cursoRoutes);
+
+//Si nada se encuentra se corre
+app.use((req,res,next)=> {
+    const error = new Error('Not found');
+    error.status = 404;
+    next(error);
+});
+
+//En caso que nada se encuentre
+app.use((error, req,res,next)=>{
+    res.status(error.status  || 500);
+    res.json({
+        mensaje: error.message,
+        estado: error.status 
+    });
+});
 
 module.exports = app;
 

@@ -8,6 +8,6 @@ module.exports = (req,res,next) =>{
         req.userData = decoded;
         next();
     }catch(error){
-        res.status(500).json({message: "No logeado"});
+        res.status(401).json({message: "No tiene permisos para realizar esta accion"});
     }
 };

@@ -50,12 +50,12 @@ exports.post_new_estudiantes = (req,res,next)=>{
     .exec()
     .then(resultado =>{
         if(resultado.length>= 1){
-            res.status(500).json({message: "Problema al generar cuenta"})
+            res.status(422).json({message: "Problema al generar cuenta"})
         }
         else{
             bcrypt.hash(req.body.secreto, 10, (err,hash)=>{
                 if(err){
-                    res.status(500).json({message: "Error al crear cuenta"});
+                    res.status(422).json({message: "Error al crear cuenta"});
                 }
                 else{
                     const estudianteNuevo = new Estudiante({
@@ -84,7 +84,7 @@ exports.post_new_login = (req,res,next)=>{
     Estudiante.findOne({carnet: req.body.carnet}).exec()
     .then(doc =>{
         if(!doc){
-            res.status(500).json({message: "Falló al intentar logear"});
+            res.status(401).json({message: "Falló al intentar logear"});
         }
         else{
             bcrypt.compare(req.body.secreto, doc.secreto, (err, result)=>{
@@ -124,7 +124,6 @@ exports.post_verificar_reserva = (req, res, next) =>{
         .select('cursosInscritos horario')
         .populate('Cursos', 'hora cursosInscritos')
         .exec().then(estudianteDoc=>{
-            console.log(estudianteDoc.cursosInscritos);
             var estaInscrito = false;
             var horarioOcupado = false;
             estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
@@ -140,15 +139,14 @@ exports.post_verificar_reserva = (req, res, next) =>{
                     }
                 }
             });
-            console.log(estaInscrito);
-            console.log(horarioOcupado);
             if(estaInscrito){
                 try{
                     Estudiante.updateOne({_id:idUsuario},{ $pull: { cursosInscritos: idCurso}},{ multi: true }).exec();
                     Curso.updateOne({_id: idCurso},{ $pull: { inscritos: idUsuario}},{ multi: true }).exec();
                 }
                 catch (err){
-                    res.status(500).json(err.message);;
+                    res.status(500).json(err.message);
+                    return;
                 }
                 res.status(200).json({message:"Curso removido"});
             }
@@ -161,11 +159,12 @@ exports.post_verificar_reserva = (req, res, next) =>{
                         }
                         catch(err){
                             res.status(500).json(err.message);
+                            return;
                         }
                         res.status(200).json({message:"Curso reservado"});
                 }
                 else{
-                    res.status(500).json({message:"Conflico al intentar inscribir curso"});
+                    res.status(409).json({message:"Conflico al intentar inscribir curso"});
                 }
             }
         }).catch(err=>{
