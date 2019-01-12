@@ -4,6 +4,47 @@ const Curso = require('../models/curso');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
+exports.get_all_estudiantes = (req, res, next)=>{
+    Estudiante.find({}).sort({carnet: 1})
+    .select('_id carnet nombre apellido horario cursosInscritos cursosAsistidos')
+    .exec()
+    .then(docs =>{
+        res.status(200).json({
+            registrados: docs.length,
+            usuarios: docs.map(doc =>{
+                return {
+                    _id: doc._id,
+                    carnet: doc.carnet,
+                    nombre: doc.nombre,
+                    apellido: doc.apellido,
+                    horario: doc.horario,
+                    cursosInscritos: doc.cursosInscritos.length,
+                    cursosAsistidos: doc.cursosAsistidos.length
+                }
+            })
+        });
+    }).catch(err => {
+        res.status(500).json(err.message);
+    });
+};
+
+exports.get_personal_cursos = (req, res, next)=>{
+    idUsuario = req.userData.idUsuario;
+    Estudiante.findById(idUsuario)
+    .select('cursosInscritos cursosAsistidos')
+    .exec()
+    .then(resultado =>{
+        res.status(200).json({
+            cursosInscritos : resultado.cursosInscritos,
+            cursosAsistidos : resultado.cursosAsistidos
+        })
+    })
+    .catch(err => {
+        res.status(500).json(err);
+    });
+};
+
 exports.post_new_estudiantes = (req,res,next)=>{
     Estudiante.find({carnet: req.body.carnet})
     .exec()
@@ -37,40 +78,6 @@ exports.post_new_estudiantes = (req,res,next)=>{
     .catch(err => {
         res.status(500).json(err);
     });
-};
-
-exports.get_all_estudiantes = (req, res, next)=>{
-    Estudiante.find({}).sort({carnet: 1})
-    .select('_id carnet nombre apellido horario cursosInscritos cursosAsistidos')
-    .exec()
-    .then(docs =>{
-        res.status(200).json({
-            registrados: docs.length,
-            usuarios: docs.map(doc =>{
-                return {
-                    _id: doc._id,
-                    carnet: doc.carnet,
-                    nombre: doc.nombre,
-                    apellido: doc.apellido,
-                    horario: doc.horario,
-                    cursosInscritos: doc.cursosInscritos.length,
-                    cursosAsistidos: doc.cursosAsistidos.length
-                }
-            })
-        });
-    }).catch(err => {
-        res.status(500).json(err.message);
-    });
-};
-
-
-exports.delete_estudiante = (req, res, next)=>{
-    const id = req.params.idEstudiante;
-    Estudiante.remove({_id: id}).exec().then(result => {
-        res.status(200).json({message: "Estudiante borrado"});
-    }).catch(err => {
-        res.status(500).json(err);
-    }); 
 };
 
 exports.post_new_login = (req,res,next)=>{
@@ -115,21 +122,26 @@ exports.post_verificar_reserva = (req, res, next) =>{
     .then(cursoDoc =>{
         Estudiante.findById(idUsuario)
         .select('cursosInscritos horario')
-        .populate('Cursos', 'cursosInscritos')
+        .populate('Cursos', 'hora cursosInscritos')
         .exec().then(estudianteDoc=>{
             console.log(estudianteDoc.cursosInscritos);
             var estaInscrito = false;
             var horarioOcupado = false;
             estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
                 if(cursoDoc._id+""==arregloInscritos._id+""){
-                        estaInscrito = true;
+                    estaInscrito = true;
                 }
                 else{
                     if(cursoDoc.horario==arregloInscritos.horario){
                         horarioOcupado = true;
                     }
+                    else if(cursoDoc.hora==arregloInscritos.hora){
+                        horarioOcupado = true;
+                    }
                 }
             });
+            console.log(estaInscrito);
+            console.log(horarioOcupado);
             if(estaInscrito){
                 try{
                     Estudiante.updateOne({_id:idUsuario},{ $pull: { cursosInscritos: idCurso}},{ multi: true }).exec();
@@ -142,7 +154,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
             }
             else{
                 if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo) && !horarioOcupado &&
-                    estudianteDoc.horario == cursoDoc.horario){
+                    estudianteDoc.horario != cursoDoc.horario){
                         try{
                             Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec();
                             Curso.updateMany({_id: idCurso},{$addToSet: {inscritos:idUsuario}}).exec();
@@ -164,3 +176,13 @@ exports.post_verificar_reserva = (req, res, next) =>{
     });
     
 };
+
+exports.delete_estudiante = (req, res, next)=>{
+    const id = req.params.idEstudiante;
+    Estudiante.remove({_id: id}).exec().then(result => {
+        res.status(200).json({message: "Estudiante borrado"});
+    }).catch(err => {
+        res.status(500).json(err);
+    }); 
+};
+
