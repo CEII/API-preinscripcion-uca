@@ -131,9 +131,6 @@ exports.post_verificar_reserva = (req, res, next) =>{
                     estaInscrito = true;
                 }
                 else{
-                    
-                    console.log(cursoDoc.hora+" "+arregloInscritos.hora);
-                    console.log(cursoDoc.numeroDia+" "+arregloInscritos.numeroDia);
                     if(cursoDoc.horario==arregloInscritos.horario){
                         horarioOcupado = true;
                     }
