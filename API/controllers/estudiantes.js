@@ -97,7 +97,7 @@ exports.post_new_login = (req,res,next)=>{
                             idUsuario: doc._id,
                             carnet: doc.carnet,
                             horario: doc.horario
-                        },"secret_preU0993281A",{
+                        },process.env.JWTSECRET, {
                             expiresIn: "4h"
                         });
                         res.status(200).json({message: token});

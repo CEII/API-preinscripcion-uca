@@ -11,8 +11,8 @@ app.use(morgan('dev'));
 
 //Conexion a la base datos
 mongoose.connect(
-    'mongodb://shop-user:5MEGjBgDulqbVW8Z@storedatabase-shard-00-00-o0sy6.mongodb.net:27017,storedatabase-shard-00-01-o0sy6.mongodb.net:27017,storedatabase-shard-00-02-o0sy6.mongodb.net:27017/test?ssl=true&replicaSet=StoreDatabase-shard-0&authSource=admin&retryWrites=true', {
-      useNewUrlParser: true 
+    process.env.MONGOOSE_CONN, {
+        useNewUrlParser: true 
  });
 
 //Acepta cuerpos de url simple
