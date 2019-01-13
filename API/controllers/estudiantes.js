@@ -159,7 +159,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
             });          
         }
         else{
-            if(cursoDoc.horario==5 && estudianteDoc.cursosAsistidos.length>=2){
+            if(cursoDoc.numeroDia==5 && estudianteDoc.cursosAsistidos.length>=2){
                 if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
                     if(!horarioOcupado && estudianteDoc.horario != cursoDoc.horario){
                             promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
