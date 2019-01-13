@@ -127,7 +127,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
         .then(cur =>{cursoDoc=cur}));
     standardPromise.push(Estudiante.findById(idUsuario)
         .select('cursosInscritos horario')
-        .populate('cursosInscritos', 'hora cursosInscritos numeroDia')
+        .populate('cursosInscritos', 'hora numeroDia cursosInscritos cursosAsistidos')
         .exec()
         .then(estu=> {estudianteDoc=estu}));
     //Las corre y espera la respuesta
@@ -159,19 +159,28 @@ exports.post_verificar_reserva = (req, res, next) =>{
             });          
         }
         else{
-            if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo) && !horarioOcupado &&
-                estudianteDoc.horario != cursoDoc.horario){
-                    promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
-                    promises.push(Curso.updateMany({_id: idCurso},{$addToSet: {inscritos:idUsuario}}).exec());
-                    Promise.all(promises).then(resultadoPromesas=>{
-                        res.status(200).json({message:"Curso reservado"});
-                    })
-                    .catch(err=>{
-                        res.status(500).json(err.message);
-                    });     
+            if(cursoDoc.horario==5 && estudianteDoc.cursosAsistidos.length>=2){
+                if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
+                    if(!horarioOcupado && estudianteDoc.horario != cursoDoc.horario){
+                            promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
+                            promises.push(Curso.updateMany({_id: idCurso},{$addToSet: {inscritos:idUsuario}}).exec());
+                            Promise.all(promises).then(resultadoPromesas=>{
+                                res.status(200).json({message:"Curso reservado"});
+                            })
+                            .catch(err=>{
+                                res.status(500).json(err.message);
+                            });     
+                    }
+                    else{
+                        res.status(409).json({message:"Conflico al intentar inscribir curso"});
+                    }
+                }
+                else{
+                    res.status(409).json({message:"Cupo lleno"});
+                }
             }
             else{
-                res.status(409).json({message:"Conflico al intentar inscribir curso"});
+                res.status(409).json({message:"Tienes que asistir al menos 2 cursos"});
             }
         }
     }).catch(err =>{
