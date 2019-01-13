@@ -135,6 +135,10 @@ exports.post_verificar_reserva = (req, res, next) =>{
     .then(corriendo =>{
         var estaInscrito = false;
         var horarioOcupado = false;
+        var verificarViernes = true;
+        if(cursoDoc.numeroDia==5 && !(estudianteDoc.cursosAsistidos.length>=2)){
+            verificarViernes=false;
+        }
         estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
             if(cursoDoc._id+""==arregloInscritos._id+""){
                 estaInscrito = true;
@@ -159,7 +163,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
             });          
         }
         else{
-            if(cursoDoc.numeroDia==5 && estudianteDoc.cursosAsistidos.length>=2){
+            if(verificarViernes){
                 if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
                     if(!horarioOcupado && estudianteDoc.horario != cursoDoc.horario){
                             promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
