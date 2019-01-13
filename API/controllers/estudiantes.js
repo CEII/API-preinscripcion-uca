@@ -138,32 +138,33 @@ exports.post_verificar_reserva = (req, res, next) =>{
         var verificarViernes = true;
         if(cursoDoc.numeroDia==5 && !(estudianteDoc.cursosAsistidos.length>=2)){
             verificarViernes=false;
-        }
-        estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
-            if(cursoDoc._id+""==arregloInscritos._id+""){
-                estaInscrito = true;
-            }
-            else{
-                if(cursoDoc.horario==arregloInscritos.horario){
-                    horarioOcupado = true;
-                }
-                else if(cursoDoc.hora==arregloInscritos.hora && cursoDoc.numeroDia == arregloInscritos.numeroDia){
-                    horarioOcupado = true;
-                }
-            }
-        });
-        if(estaInscrito){
-            promises.push(Estudiante.updateOne({_id:idUsuario},{ $pull: { cursosInscritos: idCurso}},{ multi: true }).exec());
-            promises.push(Curso.updateOne({_id: idCurso},{ $pull: { inscritos: idUsuario}},{ multi: true }).exec());
-            Promise.all(promises).then(resultadoPromesas=>{
-                res.status(200).json({message:"Curso removido"});
-            })
-            .catch(err=>{
-                res.status(500).json(err.message);
-            });          
+            res.status(409).json({message:"Tienes que asistir al menos 2 cursos"});
         }
         else{
-            if(verificarViernes){
+            estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
+                if(cursoDoc._id+""==arregloInscritos._id+""){
+                    estaInscrito = true;
+                }
+                else{
+                    if(cursoDoc.horario==arregloInscritos.horario){
+                        horarioOcupado = true;
+                    }
+                    else if(cursoDoc.hora==arregloInscritos.hora && cursoDoc.numeroDia == arregloInscritos.numeroDia){
+                        horarioOcupado = true;
+                    }
+                }
+            });
+            if(estaInscrito){
+                promises.push(Estudiante.updateOne({_id:idUsuario},{ $pull: { cursosInscritos: idCurso}},{ multi: true }).exec());
+                promises.push(Curso.updateOne({_id: idCurso},{ $pull: { inscritos: idUsuario}},{ multi: true }).exec());
+                Promise.all(promises).then(resultadoPromesas=>{
+                    res.status(200).json({message:"Curso removido"});
+                })
+                .catch(err=>{
+                    res.status(500).json(err.message);
+                });          
+            }
+            else{
                 if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
                     if(!horarioOcupado && estudianteDoc.horario != cursoDoc.horario){
                             promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
@@ -182,9 +183,6 @@ exports.post_verificar_reserva = (req, res, next) =>{
                 else{
                     res.status(409).json({message:"Cupo lleno"});
                 }
-            }
-            else{
-                res.status(409).json({message:"Tienes que asistir al menos 2 cursos"});
             }
         }
     }).catch(err =>{
