@@ -126,8 +126,8 @@ exports.post_verificar_reserva = (req, res, next) =>{
     standardPromise.push(Curso.findById(idCurso).exec()
         .then(cur =>{cursoDoc=cur}));
     standardPromise.push(Estudiante.findById(idUsuario)
-        .select('cursosInscritos horario')
-        .populate('cursosInscritos', 'hora numeroDia cursosInscritos cursosAsistidos')
+        .select('cursosInscritos horario cursosAsistidos')
+        .populate('cursosInscritos', 'hora numeroDia')
         .exec()
         .then(estu=> {estudianteDoc=estu}));
     //Las corre y espera la respuesta
@@ -135,9 +135,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
     .then(corriendo =>{
         var estaInscrito = false;
         var horarioOcupado = false;
-        var verificarViernes = true;
         if(cursoDoc.numeroDia==5 && !(estudianteDoc.cursosAsistidos.length>=2)){
-            verificarViernes=false;
             res.status(409).json({message:"Tienes que asistir al menos 2 cursos"});
         }
         else{
