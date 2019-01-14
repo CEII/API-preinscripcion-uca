@@ -191,7 +191,7 @@ exports.post_verificar_reserva = (req, res, next) =>{
 exports.delete_estudiante = (req, res, next)=>{
     const idEstudiante = req.params.idEstudiante;
     const promises = [];
-    Estudiante.findById(id).exec()
+    Estudiante.findById(idEstudiante).exec()
     .then(estudianteDoc =>{
         if(estudianteDoc){
             promises.push(Curso.updateMany({_id: {$in: estudianteDoc.cursosInscritos}},
