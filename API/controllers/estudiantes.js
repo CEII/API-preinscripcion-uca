@@ -212,3 +212,24 @@ exports.delete_estudiante = (req, res, next)=>{
     });
 };
 
+exports.patch_estudiante = (req,res,next)=>{
+    const idEstudiante = req.params.idEstudiante;
+    const estudianteCampos = {};
+    for(const opcion of req.body){
+        estudianteCampos[opcion.campoActualizar] = opcion.valor;
+    }
+    if(estudianteCampos.inscritos || estudianteCampos.asistieron || estudianteCampos.secreto){
+        res.status(304).json({message: "Por cuestiones de seguridad no se pueden modificiar --> cursosInscritos, cursosAsistidos, secreto"});
+    }
+    else{
+        Curso.updateOne({_id: idEstudiante}, { $set : estudianteCampos })
+        .exec()
+        .then(resultado => {
+            res.status(200).json({message: "Estudiante actualizado"});
+        })
+        .catch(err => {
+            errorChecker(res,err);
+        });
+    }
+};
+

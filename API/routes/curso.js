@@ -10,6 +10,7 @@ router.get('/:idCurso', cursoController.get_curso);
 router.get('/' , checkLogin, cursoController.get_horario_cursos);
 router.post('/', cursoController.post_nuevo);
 router.delete('/:idCurso', cursoController.delete_curso);
-router.delete('/:idCurso/inscritos', cursoController.delete_inscritos);
+router.delete('/:idCurso/inscritos', cursoController.delete_limpiar_inscritos);
+router.patch('/:idCurso', cursoController.patch_curso);
 
 module.exports = router;

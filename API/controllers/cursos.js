@@ -109,21 +109,55 @@ exports.post_nuevo = (req,res,next)=>{
 };
 
 exports.delete_curso = (req, res, next)=>{
-    const id = req.params.idCurso;
-    Curso.remove({_id: id}).exec().then(result => {
-        res.status(200).json({message: "Curso borrado"});
-    }).catch(err => {
-        res.status(500).json(err);
-    }); 
+    const idCurso = req.params.idCurso;
+    const promises = [];
+    Curso.findById(idCurso).exec()
+    .then(cursoDoc =>{
+        if(cursoDoc){
+            promises.push(Estudiante.updateMany({_id : {$in: cursoDoc.inscritos}}, 
+                {$pull: {cursosInscritos: idCurso, cursosAsistidos: idCurso }},{ multi: true }).exec());
+            promises.push(Curso.remove({_id: idCurso}).exec());
+            Promise.all(promises).then(resultadoPromesas=>{
+                res.status(200).json({message:"Curso borrado"});
+            })
+            .catch(err=>{
+                res.status(500).json(err.message);
+            });
+        }
+        else{
+            res.status(404).json({message: "Curso no encontrado"});
+        }
+    });
 };
 
-exports.delete_inscritos = (req, res, next)=>{
+exports.delete_limpiar_inscritos = (req, res, next)=>{
     const id = req.params.idCurso;
     Curso.updateOne({_id: id},{$set: { inscritos: []}}).exec().then(result => {
         res.status(200).json({message: "Inscritos removidos"});
     }).catch(err => {
         res.status(500).json(err);
     }); 
+};
+
+exports.patch_curso = (req,res,next)=>{
+    const idCurso = req.params.idCurso;
+    const cursoCampos = {};
+    for(const opcion of req.body){
+        cursoCampos[opcion.campoActualizar] = opcion.valor;
+    }
+    if(cursoCampos.inscritos || cursoCampos.asistieron){
+        res.status(304).json({message: "Por cuestiones de seguridad no se pueden modificiar --> inscritos, asistieron"});
+    }
+    else{
+        Curso.updateOne({_id: idCurso}, { $set : cursoCampos })
+        .exec()
+        .then(resultado => {
+            res.status(200).json({message: "Curso actualizado"});
+        })
+        .catch(err => {
+            errorChecker(res,err);
+        });
+    }
 };
 
 
