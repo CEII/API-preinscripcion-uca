@@ -34,21 +34,26 @@ exports.get_curso = (req, res, next)=>{
     Curso.findById(idCurso)
     .exec()
     .then(doc =>{
-        res.status(200).json({
-            _id: doc._id,
-            nombre: doc.nombre,
-            ponente: doc.ponente,
-            hora: doc.hora,
-            horario: doc.horario,
-            numeroDia: doc.numeroDia,
-            fechaEvento: doc.fechaEvento,
-            salon: doc.salon,
-            cupo: doc.cupo,
-            min: doc.min,
-            numeroInscritos: doc.inscritos.length,
-            inscritos: doc.inscritos,
-            descripcion: doc.descripcion
-        });
+        if(doc){
+            res.status(200).json({
+                _id: doc._id,
+                nombre: doc.nombre,
+                ponente: doc.ponente,
+                hora: doc.hora,
+                horario: doc.horario,
+                numeroDia: doc.numeroDia,
+                fechaEvento: doc.fechaEvento,
+                salon: doc.salon,
+                cupo: doc.cupo,
+                min: doc.min,
+                numeroInscritos: doc.inscritos.length,
+                inscritos: doc.inscritos,
+                descripcion: doc.descripcion
+            });
+        }
+        else{
+            res.status(404).json({message: "No existe dicho curso"})
+        }
     })
     .catch(err =>{
         res.status(500).json(err.message);

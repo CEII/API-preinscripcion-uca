@@ -114,7 +114,7 @@ exports.post_new_login = (req,res,next)=>{
     })
 };
 
-exports.post_verificar_reserva = (req, res, next) =>{
+exports.post_verificar_reserva_v2 = (req, res, next) =>{
     idCurso = req.params.idCurso;
     idUsuario = req.userData.idUsuario;
     horarioUsuario = req.userData.horario;
@@ -139,19 +139,24 @@ exports.post_verificar_reserva = (req, res, next) =>{
             res.status(409).json({message:"Tienes que asistir al menos 2 cursos"});
         }
         else{
-            estudianteDoc.cursosInscritos.forEach(arregloInscritos => {
-                if(cursoDoc._id+""==arregloInscritos._id+""){
+            for(var i in estudianteDoc.cursosInscritos){
+                //Si existe se va borrar
+                if(cursoDoc._id+""==arregloInscritos[i]._id+""){
                     estaInscrito = true;
+                    break;
                 }
                 else{
+                    //Verifica si estan en el mismo horario
                     if(cursoDoc.horario==arregloInscritos.horario){
                         horarioOcupado = true;
                     }
-                    else if(cursoDoc.hora==arregloInscritos.hora && cursoDoc.numeroDia == arregloInscritos.numeroDia){
+                    //Verifica si esta en la misma hora y dia.
+                    else if(cursoDoc.hora==arregloInscritos[i].hora && 
+                        cursoDoc.numeroDia == arregloInscritos[i].numeroDia){
                         horarioOcupado = true;
                     }
                 }
-            });
+            }
             if(estaInscrito){
                 promises.push(Estudiante.updateOne({_id:idUsuario},{ $pull: { cursosInscritos: idCurso}},{ multi: true }).exec());
                 promises.push(Curso.updateOne({_id: idCurso},{ $pull: { inscritos: idUsuario}},{ multi: true }).exec());
@@ -162,25 +167,23 @@ exports.post_verificar_reserva = (req, res, next) =>{
                     res.status(500).json(err.message);
                 });          
             }
-            else{
-                if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
-                    if(!horarioOcupado && estudianteDoc.horario != cursoDoc.horario){
-                            promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
-                            promises.push(Curso.updateMany({_id: idCurso},{$addToSet: {inscritos:idUsuario}}).exec());
-                            Promise.all(promises).then(resultadoPromesas=>{
-                                res.status(200).json({message:"Curso reservado"});
-                            })
-                            .catch(err=>{
-                                res.status(500).json(err.message);
-                            });     
-                    }
-                    else{
-                        res.status(409).json({message:"Conflico al intentar inscribir curso"});
-                    }
+            else if(parseInt(cursoDoc.inscritos.length) < parseInt(cursoDoc.cupo)){
+                if(!horarioOcupado){
+                        promises.push(Estudiante.updateMany({_id: idUsuario},{$addToSet: {cursosInscritos:idCurso}}).exec());
+                        promises.push(Curso.updateMany({_id: idCurso},{$addToSet: {inscritos:idUsuario}}).exec());
+                        Promise.all(promises).then(resultadoPromesas=>{
+                            res.status(200).json({message:"Curso reservado"});
+                        })
+                        .catch(err=>{
+                            res.status(500).json(err.message);
+                        });     
                 }
                 else{
-                    res.status(409).json({message:"Cupo lleno"});
+                    res.status(409).json({message:"Conflico al intentar inscribir curso"});
                 }
+            }
+            else{
+                res.status(409).json({message:"Cupo lleno"});
             }
         }
     }).catch(err =>{
