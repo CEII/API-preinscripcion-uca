@@ -10,5 +10,6 @@ router.get('/:idCurso', cursoController.get_curso);
 router.get('/' , checkLogin, cursoController.get_horario_cursos);
 router.post('/', cursoController.post_nuevo);
 router.delete('/:idCurso', cursoController.delete_curso);
+router.delete('/:idCurso/inscritos', cursoController.delete_inscritos);
 
 module.exports = router;

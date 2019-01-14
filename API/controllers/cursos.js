@@ -117,3 +117,13 @@ exports.delete_curso = (req, res, next)=>{
     }); 
 };
 
+exports.delete_inscritos = (req, res, next)=>{
+    const id = req.params.idCurso;
+    Curso.updateOne({_id: id},{$set: { inscritos: []}}).exec().then(result => {
+        res.status(200).json({message: "Inscritos removidos"});
+    }).catch(err => {
+        res.status(500).json(err);
+    }); 
+};
+
+
