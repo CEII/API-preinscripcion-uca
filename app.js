@@ -1,6 +1,5 @@
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const path = require('path');
 const mongoose = require('mongoose');
 
 const express = require('express');
@@ -41,10 +40,6 @@ app.use((req,res,next)=>{
     }
     next();
 });
-//Configuracion de la pagina
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 //Rutas de la pagina
 //app.use('/sistema/registrar', registrarRoutes);
