@@ -31,28 +31,23 @@ exports.get_all_cursos = (req, res, next)=>{
 
 exports.get_curso = (req, res, next)=>{
     idCurso = req.params.idCurso;
-    Curso.findById(idCurso).sort({horario: -1, numeroDia: 1})
+    Curso.findById(idCurso)
     .exec()
-    .then(docs =>{
+    .then(doc =>{
         res.status(200).json({
-            numeroCursos: docs.length,
-            cursos: docs.map(doc=>{
-                return {
-                   _id: doc._id,
-                   nombre: doc.nombre,
-                   ponente: doc.ponente,
-                   hora: doc.hora,
-                   horario: doc.horario,
-                   numeroDia: doc.numeroDia,
-                   fechaEvento: doc.fechaEvento,
-                   salon: doc.salon,
-                   cupo: doc.cupo,
-                   min: doc.min,
-                   numeroInscritos: doc.inscritos.length,
-                   inscritos: doc.inscritos,
-                   descripcion: doc.descripcion
-                }
-            })
+            _id: doc._id,
+            nombre: doc.nombre,
+            ponente: doc.ponente,
+            hora: doc.hora,
+            horario: doc.horario,
+            numeroDia: doc.numeroDia,
+            fechaEvento: doc.fechaEvento,
+            salon: doc.salon,
+            cupo: doc.cupo,
+            min: doc.min,
+            numeroInscritos: doc.inscritos.length,
+            inscritos: doc.inscritos,
+            descripcion: doc.descripcion
         });
     })
     .catch(err =>{
