@@ -189,11 +189,26 @@ exports.post_verificar_reserva = (req, res, next) =>{
 };
 
 exports.delete_estudiante = (req, res, next)=>{
-    const id = req.params.idEstudiante;
-    Estudiante.remove({_id: id}).exec().then(result => {
-        res.status(200).json({message: "Estudiante borrado"});
+    const idEstudiante = req.params.idEstudiante;
+    const promises = [];
+    Estudiante.findById(id).exec()
+    .then(estudianteDoc =>{
+        if(estudianteDoc){
+            promises.push(Curso.updateMany({_id: {$in: estudianteDoc.cursosInscritos}},
+                { $pull: { inscritos: idEstudiante}},{ multi: true }).exec());
+            //promises.push(Estudiante.remove({_id: idEstudiante}).exec());
+            Promise.all(promises).then(resultadoPromesas=>{
+                res.status(200).json({message:"Estudiante borrado"});
+            })
+            .catch(err=>{
+                res.status(500).json(err.message);
+            });
+        }
+        else{
+            res.status(404).json({message: "Estudiante no encontrado"});
+        }
     }).catch(err => {
         res.status(500).json(err);
-    }); 
+    });
 };
 
