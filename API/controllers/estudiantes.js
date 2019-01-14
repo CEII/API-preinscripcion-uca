@@ -196,7 +196,7 @@ exports.delete_estudiante = (req, res, next)=>{
         if(estudianteDoc){
             promises.push(Curso.updateMany({_id: {$in: estudianteDoc.cursosInscritos}},
                 { $pull: { inscritos: idEstudiante}},{ multi: true }).exec());
-            //promises.push(Estudiante.remove({_id: idEstudiante}).exec());
+            promises.push(Estudiante.remove({_id: idEstudiante}).exec());
             Promise.all(promises).then(resultadoPromesas=>{
                 res.status(200).json({message:"Estudiante borrado"});
             })
