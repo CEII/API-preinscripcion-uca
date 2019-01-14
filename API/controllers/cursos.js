@@ -29,6 +29,38 @@ exports.get_all_cursos = (req, res, next)=>{
     });
 };
 
+exports.get_curso = (req, res, next)=>{
+    idCurso = req.params.idCurso;
+    Curso.findById(idCurso).sort({horario: -1, numeroDia: 1})
+    .exec()
+    .then(docs =>{
+        res.status(200).json({
+            numeroCursos: docs.length,
+            cursos: docs.map(doc=>{
+                return {
+                   _id: doc._id,
+                   nombre: doc.nombre,
+                   ponente: doc.ponente,
+                   hora: doc.hora,
+                   horario: doc.horario,
+                   numeroDia: doc.numeroDia,
+                   fechaEvento: doc.fechaEvento,
+                   salon: doc.salon,
+                   cupo: doc.cupo,
+                   min: doc.min,
+                   numeroInscritos: doc.inscritos.length,
+                   inscritos: doc.inscritos,
+                   descripcion: doc.descripcion
+                }
+            })
+        });
+    })
+    .catch(err =>{
+        res.status(500).json(err.message);
+    });
+};
+
+
 exports.get_horario_cursos = (req, res ,next)=>{
     horarioUsuario = req.userData.horario;
     Curso.find({horario: {$ne:horarioUsuario}})
