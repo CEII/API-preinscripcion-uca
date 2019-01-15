@@ -64,7 +64,7 @@ exports.get_curso = (req, res, next)=>{
 exports.get_horario_cursos = (req, res ,next)=>{
     horarioUsuario = req.userData.horario;
     horarioP = (horarioUsuario=="tarde")?"mañana":"tarde";
-    Curso.find({}).sort({horario: horarioP, numeroDia: 1})
+    Curso.find({}).sort({horario: -1, numeroDia: 1})
     .sort({numeroDia: 1})
     .exec()
     .then(docs =>{
