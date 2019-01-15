@@ -63,12 +63,14 @@ exports.get_curso = (req, res, next)=>{
 
 exports.get_horario_cursos = (req, res ,next)=>{
     horarioUsuario = req.userData.horario;
-    Curso.find({horario: {$ne:horarioUsuario}})
+    horarioP = (horarioPreferido=="tarde")?"mañana":"tarde";
+    Curso.find({}).sort({horario: horarioP, numeroDia: 1})
     .sort({numeroDia: 1})
     .exec()
     .then(docs =>{
         res.status(200).json({
             numeroCursos: docs.length,
+            horarioPreferido: horarioP,
             cursos: docs.map(doc=>{
                 return {
                    _id: doc._id,

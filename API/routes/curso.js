@@ -4,7 +4,6 @@ const cursoController = require('../controllers/cursos');
 const checkLogin = require('../middleware/check-token');
 
 
-//Cursos
 router.get('/todos',  cursoController.get_all_cursos);
 router.get('/:idCurso', cursoController.get_curso);
 router.get('/' , checkLogin, cursoController.get_horario_cursos);
