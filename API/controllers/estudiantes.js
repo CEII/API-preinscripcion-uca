@@ -147,7 +147,7 @@ exports.post_verificar_reserva_v2 = (req, res, next) =>{
                 }
                 else{
                     //Verifica si estan en el mismo horario
-                    if(cursoDoc.horario==arregloInscritos.horario){
+                    if(cursoDoc.horario==arregloInscritos[i].horario){
                         horarioOcupado = true;
                     }
                     //Verifica si esta en la misma hora y dia.
