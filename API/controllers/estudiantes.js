@@ -97,7 +97,7 @@ exports.post_new_login = (req,res,next)=>{
                             idUsuario: doc._id,
                             carnet: doc.carnet,
                             horario: doc.horario
-                        },process.env.JWTSECRET, {
+                        }, process.env.JWTSECRET, {
                             expiresIn: "4h"
                         });
                         res.status(200).json({message: token});
@@ -228,8 +228,32 @@ exports.patch_estudiante = (req,res,next)=>{
             res.status(200).json({message: "Estudiante actualizado"});
         })
         .catch(err => {
-            errorChecker(res,err);
+            res.status(500).json(err);
         });
     }
+};
+
+exports.patch_password_reset = (req, res, next) =>{
+    const idEstudiante = req.params.idEstudiante;
+    Estudiante.findById(idEstudiante).exec()
+    .then(estudianteDoc =>{
+        if(estudianteDoc){
+            const clave = Date.now()+"";
+            bcrypt.hash(clave, 10, (err,hash)=>{
+                Estudiante.updateOne({_id: estudianteDoc}, {$set: {secreto: hash}}).exec()
+                .then(edited=>{
+                    console.log(clave);
+                    res.status(200).json({secreto:clave});
+                }).catch( err=>{
+                res.status(500).json(err);
+                });
+            });
+        }
+        else{
+            res.status(404).json({message: "Estudiante no encontrado"});
+        }
+    }).catch(err =>{
+        res.status(500).json(err);
+    });
 };
 

@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //Rutas
-const registrarRoutes = require('./API/routes/registrar');
+//const registrarRoutes = require('./API/routes/registrar');
 const estudianteRoutes = require('./API/routes/estudiante');
 const cursoRoutes = require('./API/routes/curso');
 

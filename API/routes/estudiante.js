@@ -11,5 +11,6 @@ router.post('/login', estudianteController.post_new_login);
 router.post('/reservar/:idCurso', checkLogin, estudianteController.post_verificar_reserva_v2);
 router.delete('/:idEstudiante', estudianteController.delete_estudiante);
 router.patch('/:idEstudiante', estudianteController.patch_estudiante);
+router.patch('/reestablecer/:idEstudiante', estudianteController.patch_password_reset);
 
 module.exports = router;
