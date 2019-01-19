@@ -32,6 +32,7 @@ exports.get_all_cursos = (req, res, next)=>{
 exports.get_curso = (req, res, next)=>{
     idCurso = req.params.idCurso;
     Curso.findById(idCurso)
+    .populate('inscritos', '_id carnet nombre apellido')
     .exec()
     .then(doc =>{
         if(doc){
