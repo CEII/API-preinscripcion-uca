@@ -11,5 +11,6 @@ router.post('/', cursoController.post_nuevo);
 router.delete('/:idCurso', cursoController.delete_curso);
 router.delete('/:idCurso/inscritos', cursoController.delete_limpiar_inscritos);
 router.patch('/:idCurso', cursoController.patch_curso);
+router.patch('/:idCurso/asistidos', cursoController.patch_cursosAsistidos);
 
 module.exports = router;

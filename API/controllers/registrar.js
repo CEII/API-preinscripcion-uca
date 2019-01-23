@@ -2,7 +2,7 @@
 var GoogleSpreadsheet = require('google-spreadsheet');
 var creds = require('../../client_secret.json');
 var doc = new GoogleSpreadsheet(process.env.GOOGLESHEET);
-
+const Curso = require('../models/curso');
 
 exports.check_cred= (req, res, next) =>{
     doc.useServiceAccountAuth(creds,  (err) => {
@@ -74,7 +74,32 @@ exports.check_duplicate = (req,res,next)=>{
         next();
     });
 }
-
+/*
+exports.post_exportar_clase = (req,res,next) =>{
+    idCurso = req.params.idCurso;
+    Curso.findById(idCurso)
+    .populate('inscritos', '_id carnet nombre apellido')
+    .exec()
+    .then(result =>{
+        if(result){
+            for(var i in result.inscritos){
+                
+                doc.addRow(8+i,
+                        {no:i,
+                         nombrecompleto: result.inscritos[i].nombre + " " + result.inscritos[i].apellido,
+                         nodecarne: result.inscritos[i].carnet,
+                         aula: result.salon} )
+            }
+        }
+        else{
+            res.status(404).json({message: "No existe dicho curso"})
+        }
+    })
+    .catch(err =>{
+        res.status(500).json(err.message);
+    });
+};
+*/
 exports.post_curso = (req, res, next)=>{
     if(!req.registerUpdate){
         doc.addRow(1, { carnet: req.body.carnet, 

@@ -1,4 +1,5 @@
 const Curso = require('../models/curso');
+const Estudiante = require('../models/estudiante');
 
 exports.get_all_cursos = (req, res, next)=>{
     Curso.find({}).sort({horario: -1, numeroDia: 1})
@@ -19,6 +20,7 @@ exports.get_all_cursos = (req, res, next)=>{
                    cupo: doc.cupo,
                    min: doc.min,
                    numeroInscritos: doc.inscritos.length,
+                   numeroAsisitidos: doc.asistieron.length,
                    descripcion: doc.descripcion
                 }
             })
@@ -166,6 +168,34 @@ exports.patch_curso = (req,res,next)=>{
             errorChecker(res,err);
         });
     }
+};
+
+exports.patch_cursosAsistidos = (req, res, next) =>{
+    const carnetsAsistido = req.body;
+    const idCurso = req.params.idCurso;
+    var doto; 
+    console.log(carnetsAsistido.length);
+    const aCambiar = [];
+    const promises = [];
+    Estudiante.find({carnet: {$in : carnetsAsistido}}).select('_id cursosAsistidos carnet').exec()
+    .then(estudianteDocs =>{
+        for(var i in estudianteDocs){
+            aCambiar.push(estudianteDocs[i]._id);
+        }
+        console.log(aCambiar.length);
+        //Actualiza curso
+        promises.push(Curso.updateOne({_id:idCurso}, {$addToSet : {asistieron: {$each:aCambiar}}}).exec());
+        //Actualiza Estudiantes
+        promises.push(Estudiante.updateMany({_id: {$in: aCambiar}},{$addToSet: {cursosAsistidos: idCurso}}).exec());
+        Promise.all(promises).then(resultado =>{
+            res.status(200).json({message: "Actualizacion exitosa"})
+        }).catch(err=>{
+            res.status(500).json({message: err.message})
+        });
+    })
+    .catch(err=>{
+        res.status(500).json({message: err.message})
+    });
 };
 
 
